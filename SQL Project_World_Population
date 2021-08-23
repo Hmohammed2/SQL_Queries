@@ -1,0 +1,48 @@
+SELECT *
+FROM population_years
+LIMIT 10;
+
+SELECT DISTINCT country, 
+year, population
+FROM population_years
+WHERE country LIKE "Gabon";
+
+SELECT DISTINCT country, 
+year, population
+FROM population_years
+WHERE year == "2005"
+ORDER BY population ASC
+LIMIT 10;
+
+-- Niue has the lowest population in the year 2005
+
+SELECT DISTINCT country, 
+year, population
+FROM population_years
+WHERE year == "2010"
+	AND population >= 100
+ORDER BY population ASC;
+
+SELECT DISTINCT country 
+FROM population_years
+WHERE country LIKE "%Islands%"
+ORDER BY population ASC;
+
+-- 9 countries with Islands in their name
+
+WITH Indon_2000 AS(
+SELECT DISTINCT country, year, population 
+FROM population_years
+WHERE country == "Indonesia"
+	AND year == "2000"
+),
+Indon_2010 AS(
+SELECT DISTINCT country, year, population 
+FROM population_years
+WHERE country == "Indonesia"
+	AND year == "2010"
+)
+SELECT SUM(Indon_2010.population)-SUM(Indon_2000.population)
+AS "Indonesia 2010 vs 2000 "
+FROM Indon_2000
+CROSS JOIN Indon_2010;

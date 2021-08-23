@@ -1,0 +1,70 @@
+SELECT * 
+FROM state_climate
+LIMIT 5;
+
+-- Compute running avg for temperature. Results show a steady trend increase along the years for each state
+SELECT state, year, tempf,
+AVG(tempc) OVER(
+  PARTITION BY state
+  ORDER BY year
+) as running_avg_temp
+FROM state_climate;
+
+-- lowest temp for each state shown alongside dataset rows
+SELECT state, year, tempf,
+FIRST_VALUE(tempc) OVER(
+  PARTITION BY state
+  ORDER BY tempc
+) as lowest_temp
+FROM state_climate;
+
+-- Highest temp for each state shown alongside dataset rows
+SELECT state, year, tempf,
+LAST_VALUE(tempc) OVER(
+  PARTITION BY state
+  ORDER BY tempc
+  RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+) as highest_temp
+FROM state_climate;
+
+-- Minnesota seemed to have the biggest increase in temp from 2012 to 2013
+SELECT state, year, tempf,
+LAG(tempc, 1, tempc) OVER(
+  PARTITION BY state
+  ORDER BY year
+) - tempc as change_in_temp
+FROM state_climate
+ORDER BY change_in_temp DESC;
+
+-- coldest years tend to be more historic then recent
+SELECT state, year, tempf,
+RANK() OVER(
+  PARTITION BY state
+  ORDER BY tempc ASC
+) as coldest_rank
+FROM state_climate
+ORDER BY coldest_rank ASC;
+
+-- Hottest years seem to be a little more recent with some being historic
+SELECT state, year, tempf,
+RANK() OVER(
+  PARTITION BY state
+  ORDER BY tempc DESC
+) as warmest_rank
+FROM state_climate
+ORDER BY warmest_rank ASC;
+
+SELECT
+NTILE(4) OVER(
+  PARTITION BY state
+  ORDER BY tempc ASC
+) as quartile,
+ year, state ,tempf
+ FROM state_climate;
+
+SELECT
+NTILE(5) OVER(
+  ORDER BY tempc ASC
+) as quartile,
+ year, state ,tempf
+ FROM state_climate;
